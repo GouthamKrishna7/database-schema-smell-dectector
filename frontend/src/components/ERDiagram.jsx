@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
-import { Key, Link2, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Move, Database } from 'lucide-react';
+import { Key, Link2, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Database } from 'lucide-react';
 
 export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
   const [positions, setPositions] = useState({});
@@ -13,7 +13,6 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
 
   const containerRef = useRef(null);
 
-  // Group smells by table
   const smellsByTable = {};
   (smells || []).forEach((s) => {
     const tname = s.table_name.toLowerCase();
@@ -21,7 +20,6 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
     smellsByTable[tname].push(s);
   });
 
-  // Calculate automatic initial grid layout for tables
   useEffect(() => {
     if (!tables || tables.length === 0) return;
 
@@ -42,7 +40,6 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
     setPositions(newPositions);
   }, [tables]);
 
-  // Dragging table handling
   const handleTableMouseDown = (e, tableName) => {
     e.stopPropagation();
     const pos = positions[tableName.toLowerCase()] || { x: 0, y: 0 };
@@ -83,7 +80,6 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
     setIsPanning(false);
   };
 
-  // Build relationship edges (Foreign Keys)
   const edges = [];
   (tables || []).forEach((table) => {
     const sourceName = table.name.toLowerCase();
@@ -100,33 +96,30 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
   });
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg flex flex-col">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col transition-colors">
       {/* Header with tools */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-800/60 border-b border-slate-800 text-xs">
-        <div className="flex items-center gap-2 text-slate-300 font-medium">
-          <Database className="w-4 h-4 text-teal-400" />
+      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs">
+        <div className="flex items-center gap-2 text-slate-800 dark:text-slate-300 font-bold">
+          <Database className="w-4 h-4 text-teal-600 dark:text-teal-400" />
           <span>Interactive Relational ER Diagram</span>
-          <span className="text-slate-500">•</span>
-          <span className="text-slate-400 text-[11px] hidden sm:inline">
-            Drag tables to rearrange • Click to inspect smells
-          </span>
+          <span className="text-slate-400 hidden sm:inline">• Drag tables to rearrange • Click to view smells</span>
         </div>
 
         {/* Zoom & Reset Controls */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setZoom((z) => Math.min(1.6, z + 0.15))}
-            className="p-1.5 rounded bg-slate-700/60 hover:bg-slate-700 text-slate-300 transition"
+            className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700/60 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
             title="Zoom In"
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
-          <span className="text-[11px] font-mono text-slate-400 w-10 text-center">
+          <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 w-10 text-center">
             {Math.round(zoom * 100)}%
           </span>
           <button
             onClick={() => setZoom((z) => Math.max(0.4, z - 0.15))}
-            className="p-1.5 rounded bg-slate-700/60 hover:bg-slate-700 text-slate-300 transition"
+            className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700/60 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
             title="Zoom Out"
           >
             <ZoomOut className="w-3.5 h-3.5" />
@@ -136,7 +129,7 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
               setZoom(1);
               setPan({ x: 20, y: 20 });
             }}
-            className="p-1.5 rounded bg-slate-700/60 hover:bg-slate-700 text-slate-300 transition"
+            className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700/60 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
             title="Reset Pan & Zoom"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -150,10 +143,11 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
         onMouseDown={handleContainerMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        className="relative w-full h-[620px] bg-slate-950 overflow-hidden cursor-grab active:cursor-grabbing select-none"
+        className="relative w-full h-[620px] bg-slate-100 dark:bg-slate-950 overflow-hidden cursor-grab active:cursor-grabbing select-none transition-colors"
         style={{
-          backgroundImage: 'radial-gradient(#1e293b 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)',
           backgroundSize: '24px 24px',
+          color: 'rgba(148, 163, 184, 0.2)',
         }}
       >
         <div
@@ -187,7 +181,6 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
               const tgtPos = positions[edge.target];
               if (!srcPos || !tgtPos) return null;
 
-              // Card dimensions estimate
               const cardW = 240;
               const cardH = 180;
 
@@ -216,10 +209,10 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
                   <text
                     x={(x1 + x2) / 2}
                     y={(y1 + y2) / 2 - 6}
-                    fill="#5eead4"
+                    fill="#0f766e"
                     fontSize="10"
                     textAnchor="middle"
-                    className="font-mono bg-slate-900 px-1"
+                    className="font-mono font-bold bg-white dark:bg-slate-900 px-1"
                   >
                     {edge.sourceCol} → {edge.targetCol}
                   </text>
@@ -249,28 +242,28 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
                   transform: `translate(${pos.x}px, ${pos.y}px)`,
                   width: '240px',
                 }}
-                className={`absolute rounded-xl bg-slate-900 border text-xs shadow-2xl transition-shadow cursor-move z-10 ${
+                className={`absolute rounded-2xl bg-white dark:bg-slate-900 border text-xs shadow-lg transition-shadow cursor-move z-10 ${
                   isSelected
-                    ? 'border-teal-400 ring-2 ring-teal-400/40'
+                    ? 'border-teal-500 ring-2 ring-teal-500/40'
                     : hasCritical
-                    ? 'border-rose-500/70'
+                    ? 'border-rose-400 dark:border-rose-500/70'
                     : hasSmells
-                    ? 'border-amber-500/70'
-                    : 'border-slate-800'
+                    ? 'border-amber-400 dark:border-amber-500/70'
+                    : 'border-slate-200 dark:border-slate-800'
                 }`}
               >
                 {/* Table Header */}
                 <div
-                  className={`flex items-center justify-between px-3 py-2 rounded-t-xl font-semibold border-b ${
+                  className={`flex items-center justify-between px-3 py-2 rounded-t-2xl font-bold border-b ${
                     hasCritical
-                      ? 'bg-rose-950/50 border-rose-900/60 text-rose-200'
+                      ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-200'
                       : hasSmells
-                      ? 'bg-amber-950/40 border-amber-900/60 text-amber-200'
-                      : 'bg-slate-800/80 border-slate-700/80 text-slate-200'
+                      ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-200'
+                      : 'bg-slate-100 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-1.5 truncate">
-                    <Database className="w-3.5 h-3.5 shrink-0 text-teal-400" />
+                    <Database className="w-3.5 h-3.5 shrink-0 text-teal-600 dark:text-teal-400" />
                     <span className="truncate">{table.name}</span>
                   </div>
 
@@ -290,7 +283,7 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
                 </div>
 
                 {/* Column List */}
-                <div className="max-h-56 overflow-y-auto divide-y divide-slate-800/60 font-mono text-[11px]">
+                <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-[11px]">
                   {table.columns.map((col) => {
                     const isPK = col.is_primary_key || (table.primary_keys || []).includes(col.name);
                     const isFK = (table.foreign_keys || []).some((fk) =>
@@ -301,37 +294,37 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
                     return (
                       <div
                         key={col.name}
-                        className={`flex items-center justify-between px-2.5 py-1.5 hover:bg-slate-800/50 transition ${
-                          isSmellyCol ? 'bg-rose-950/20 text-rose-200' : 'text-slate-300'
+                        className={`flex items-center justify-between px-2.5 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition ${
+                          isSmellyCol ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-200' : 'text-slate-700 dark:text-slate-300'
                         }`}
                       >
                         <div className="flex items-center gap-1.5 truncate">
                           {isPK && (
                             <Key
-                              className="w-3 h-3 text-amber-400 shrink-0"
+                              className="w-3 h-3 text-amber-500 shrink-0"
                               title="Primary Key"
                             />
                           )}
                           {isFK && (
                             <Link2
-                              className="w-3 h-3 text-cyan-400 shrink-0"
+                              className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0"
                               title="Foreign Key"
                             />
                           )}
                           {!isPK && !isFK && (
-                            <span className="w-3 h-3 inline-block shrink-0 text-slate-600 text-center text-[10px]">
+                            <span className="w-3 h-3 inline-block shrink-0 text-slate-400 dark:text-slate-600 text-center text-[10px]">
                               •
                             </span>
                           )}
                           <span
                             className={`truncate ${
-                              isPK ? 'font-bold text-amber-300' : isFK ? 'text-cyan-300' : ''
+                              isPK ? 'font-bold text-amber-700 dark:text-amber-300' : isFK ? 'text-cyan-700 dark:text-cyan-300' : ''
                             }`}
                           >
                             {col.name}
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-500 shrink-0 pl-1">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 pl-1">
                           {col.data_type}
                         </span>
                       </div>
@@ -340,13 +333,13 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
                 </div>
 
                 {/* Table Footer Stats */}
-                <div className="px-2.5 py-1.5 bg-slate-950/80 rounded-b-xl border-t border-slate-800 text-[10px] text-slate-500 flex justify-between">
+                <div className="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-950/80 rounded-b-2xl border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-500 flex justify-between">
                   <span>{table.columns.length} columns</span>
                   <span>
                     {table.primary_keys.length > 0 ? (
-                      <span className="text-amber-400/90 font-medium">PK ✓</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">PK ✓</span>
                     ) : (
-                      <span className="text-rose-400 font-bold">No PK ✗</span>
+                      <span className="text-rose-600 dark:text-rose-400 font-bold">No PK ✗</span>
                     )}
                   </span>
                 </div>
@@ -357,13 +350,13 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
       </div>
 
       {/* Legend */}
-      <div className="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-600 dark:text-slate-400 gap-2">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1">
-            <Key className="w-3 h-3 text-amber-400" /> Primary Key (PK)
+            <Key className="w-3 h-3 text-amber-500" /> Primary Key (PK)
           </span>
           <span className="flex items-center gap-1">
-            <Link2 className="w-3 h-3 text-cyan-400" /> Foreign Key (FK)
+            <Link2 className="w-3 h-3 text-cyan-500" /> Foreign Key (FK)
           </span>
           <span className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block animate-pulse" /> Critical Smell
@@ -372,7 +365,7 @@ export default function ERDiagram({ tables, smells, onSelectTableSmells }) {
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> Warning Smell
           </span>
         </div>
-        <span className="text-slate-500 text-[11px]">Hold & drag background to pan canvas</span>
+        <span className="text-slate-400 text-[11px]">Hold & drag canvas to pan</span>
       </div>
     </div>
   );
